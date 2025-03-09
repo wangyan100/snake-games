@@ -69,7 +69,7 @@ class SnakeGame {
         this.draw();
         setTimeout(() => {
             this.gameLoopId = requestAnimationFrame(() => this.gameLoop());
-        }, 100); // 原为无延迟
+        }, 400); // 原为无延迟
     }
 
     private draw(): void {

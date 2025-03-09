@@ -63,7 +63,7 @@ var SnakeGame = /** @class */ (function () {
         this.draw();
         setTimeout(function () {
             _this.gameLoopId = requestAnimationFrame(function () { return _this.gameLoop(); });
-        }, 100); // 原为无延迟
+        }, 400); // 原为无延迟
     };
     SnakeGame.prototype.draw = function () {
         var _this = this;
