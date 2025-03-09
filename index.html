@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TypeScript 贪吃蛇</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background: #2c3e50;
+      }
+      #gameCanvas {
+        border: 2px solid #ecf0f1;
+        background: #34495e;
+      }
+      #score {
+        color: #ecf0f1;
+        font-size: 24px;
+        margin: 10px;
+      }
+      button {
+        padding: 10px 20px;
+        background: #27ae60;
+        border: none;
+        color: white;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game-container">
+      <canvas id="gameCanvas" width="900" height="900"></canvas>
+      <!-- 必须通过属性设置尺寸 -->
+      <div id="score">Punkte: 0</div>
+      <button id="restart">neu start</button>
+    </div>
+    <script src="dist/game.js"></script>
+    <!-- 路径正确 -->
+  </body>
+</html>

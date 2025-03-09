@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",  // 指定输出目录
+    "rootDir": "./src"   // 🔥 关键！明确源代码根目录
+  },
+  "include": ["src/**/*.ts"]
+}
