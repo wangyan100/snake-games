@@ -1,0 +1,90 @@
+# ==============================
+# 依赖和构建产物
+# ==============================
+#node_modules/
+dist/
+build/
+out/
+.coverage/
+.cache/
+*.tgz
+
+# ==============================
+# 环境变量和敏感文件
+# ==============================
+.env
+.env.local
+.env.development
+.env.production
+*.key
+*.pem
+*.cert
+*.pfx
+
+# ==============================
+# 日志和调试文件
+# ==============================
+*.log*
+logs/
+debug/
+.DS_Store
+Thumbs.db
+
+# ==============================
+# IDE 和编辑器配置
+# ==============================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# ==============================
+# 包管理器文件
+# ==============================
+# npm/yarn/pnpm
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnpm-debug.log
+
+# ==============================
+# 测试和覆盖率报告
+# ==============================
+coverage/
+.nyc_output/
+jest.config.js
+__snapshots__/
+
+# ==============================
+# 框架/工具特定文件
+# ==============================
+# Webpack/Vite
+*.hot-update.js
+.history/
+
+# TypeScript
+*.tsbuildinfo
+
+# Babel
+*.babelcache
+
+# ESLint/Prettier
+.eslintcache
+.prettierignore
+
+# ==============================
+# 操作系统临时文件
+# ==============================
+# Windows
+[Tt]humbs.db
+Desktop.ini
+
+# Linux/Mac
+*~
+*.sw[a-z]
