@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-     "dev": "tsc -w & live-server --port=5500"
+     "dev": "tsc -w",
+     "start": "live-server --port=5500"
   },
   "keywords": [],
   "author": "",
