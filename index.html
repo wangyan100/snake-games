@@ -2,42 +2,100 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TypeScript 贪吃蛇</title>
     <style>
       body {
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        min-height: 100vh;
         margin: 0;
         background: #2c3e50;
+        touch-action: manipulation;
+      }
+      .game-container {
+        position: relative;
+        text-align: center;
       }
       #gameCanvas {
         border: 2px solid #ecf0f1;
         background: #34495e;
+        max-width: 90vw;
+        max-height: 60vh;
       }
       #score {
         color: #ecf0f1;
         font-size: 24px;
         margin: 10px;
       }
-      button {
-        padding: 10px 20px;
+      #controls {
+        margin-top: 20px;
+        display: grid;
+        grid-template-areas:
+          ". up ."
+          "left . right"
+          ". down .";
+        gap: 10px;
+        justify-content: center;
+      }
+      .control-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+        border-radius: 50%;
         background: #27ae60;
-        border: none;
         color: white;
-        cursor: pointer;
+        border: none;
+        touch-action: manipulation;
+        transition: filter 0.2s;
+      }
+      .control-btn:active {
+        filter: brightness(1.2);
+      }
+      #upBtn {
+        grid-area: up;
+      }
+      #leftBtn {
+        grid-area: left;
+      }
+      #rightBtn {
+        grid-area: right;
+      }
+      #downBtn {
+        grid-area: down;
+      }
+
+      @media (max-width: 600px) {
+        #gameCanvas {
+          width: 90vw;
+          height: 90vw;
+        }
+        .control-btn {
+          width: 15vw;
+          height: 15vw;
+          font-size: 6vw;
+        }
+      }
+      #restart {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background: #e74c3c;
       }
     </style>
   </head>
   <body>
     <div class="game-container">
-      <canvas id="gameCanvas" width="900" height="900"></canvas>
-      <!-- 必须通过属性设置尺寸 -->
+      <canvas id="gameCanvas" width="400" height="400"></canvas>
       <div id="score">Punkte: 0</div>
+      <div id="controls">
+        <button class="control-btn" id="upBtn">↑</button>
+        <button class="control-btn" id="leftBtn">←</button>
+        <button class="control-btn" id="rightBtn">→</button>
+        <button class="control-btn" id="downBtn">↓</button>
+      </div>
       <button id="restart">neu start</button>
     </div>
     <script src="dist/game.js"></script>
-    <!-- 路径正确 -->
   </body>
 </html>

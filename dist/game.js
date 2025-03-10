@@ -11,38 +11,63 @@ var __assign = (this && this.__assign) || function () {
 };
 var SnakeGame = /** @class */ (function () {
     function SnakeGame() {
-        this.gridSize = 20; // 网格尺寸
+        // Game state
+        this.gridSize = 20;
         this.snake = [];
         this.food = null;
         this.direction = 'right';
         this.nextDirection = 'right';
         this.score = 0;
         this.gameLoopId = null;
-        // 初始化元素
-        this.canvas = document.getElementById('gameCanvas');
-        this.ctx = this.canvas.getContext('2d');
-        this.scoreElement = document.getElementById('score');
-        this.restartButton = document.getElementById('restart');
-        // 关键修复：确保画布尺寸正确初始化
-        console.assert(this.canvas.width === 400 && this.canvas.height === 400, "Canvas尺寸必须为400x400");
-        this.init();
-        this.bindEvents();
+        // Touch controls
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.touchStartTime = 0;
+        this.initialize();
     }
-    SnakeGame.prototype.init = function () {
-        // 初始化蛇的位置（确保在网格范围内）
-        this.snake = [{ x: 5, y: 5 }]; // 合法坐标范围：0 ≤ x,y ≤ 19 (400/20-1)
-        this.generateFood();
+    SnakeGame.prototype.initialize = function () {
+        this.initDOMElements();
+        this.setupCanvas();
+        this.bindEvents();
+        this.initGame();
+    };
+    SnakeGame.prototype.initDOMElements = function () {
+        var getElement = function (id) {
+            var el = document.getElementById(id);
+            if (!el)
+                throw new Error("Element #".concat(id, " not found"));
+            return el;
+        };
+        this.canvas = getElement('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.scoreElement = getElement('score');
+        this.restartButton = getElement('restart');
+        this.upBtn = getElement('upBtn');
+        this.downBtn = getElement('downBtn');
+        this.leftBtn = getElement('leftBtn');
+        this.rightBtn = getElement('rightBtn');
+    };
+    SnakeGame.prototype.setupCanvas = function () {
+        var _this = this;
+        this.adjustCanvasSize();
+        window.addEventListener('resize', function () { return _this.adjustCanvasSize(); });
+        console.assert(this.canvas.width === 400 && this.canvas.height === 400, "Canvas size must be 400x400");
+    };
+    SnakeGame.prototype.adjustCanvasSize = function () {
+        var maxSize = Math.min(window.innerWidth - 40, 400);
+        this.canvas.style.width = "".concat(maxSize, "px");
+        this.canvas.style.height = "".concat(maxSize, "px");
+    };
+    SnakeGame.prototype.initGame = function () {
+        this.snake = [{ x: 5, y: 5 }];
+        this.direction = 'right';
+        this.nextDirection = 'right';
         this.score = 0;
+        this.generateFood();
         this.updateScore();
-        // 清除旧游戏循环
-        if (this.gameLoopId) {
-            cancelAnimationFrame(this.gameLoopId);
-        }
-        // 启动新循环
-        this.gameLoop();
+        this.startGameLoop();
     };
     SnakeGame.prototype.generateFood = function () {
-        // 生成食物（确保不与蛇身重叠）
         var maxPos = this.canvas.width / this.gridSize;
         var newFood;
         do {
@@ -54,7 +79,12 @@ var SnakeGame = /** @class */ (function () {
         this.food = newFood;
     };
     SnakeGame.prototype.updateScore = function () {
-        this.scoreElement.textContent = "Punkte: ".concat(this.score);
+        this.scoreElement.textContent = "Score: ".concat(this.score);
+    };
+    SnakeGame.prototype.startGameLoop = function () {
+        if (this.gameLoopId)
+            cancelAnimationFrame(this.gameLoopId);
+        this.gameLoop();
     };
     SnakeGame.prototype.gameLoop = function () {
         var _this = this;
@@ -63,17 +93,17 @@ var SnakeGame = /** @class */ (function () {
         this.draw();
         setTimeout(function () {
             _this.gameLoopId = requestAnimationFrame(function () { return _this.gameLoop(); });
-        }, 400); // 原为无延迟
+        }, 400);
     };
     SnakeGame.prototype.draw = function () {
         var _this = this;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        // 绘制蛇
+        // Draw snake
         this.ctx.fillStyle = '#2ecc71';
         this.snake.forEach(function (segment) {
             _this.ctx.fillRect(segment.x * _this.gridSize, segment.y * _this.gridSize, _this.gridSize - 2, _this.gridSize - 2);
         });
-        // 绘制食物
+        // Draw food
         if (this.food) {
             this.ctx.fillStyle = '#e74c3c';
             this.ctx.fillRect(this.food.x * this.gridSize, this.food.y * this.gridSize, this.gridSize - 2, this.gridSize - 2);
@@ -109,51 +139,126 @@ var SnakeGame = /** @class */ (function () {
     SnakeGame.prototype.checkCollision = function () {
         var head = this.snake[0];
         var maxPos = this.canvas.width / this.gridSize;
-        // 边界检测
+        // Wall collision
         if (head.x < 0 || head.x >= maxPos || head.y < 0 || head.y >= maxPos) {
-            this.gameOver();
+            this.handleGameOver();
             return;
         }
-        // 自碰检测（跳过头部）
+        // Self collision
         for (var i = 1; i < this.snake.length; i++) {
             if (head.x === this.snake[i].x && head.y === this.snake[i].y) {
-                this.gameOver();
+                this.handleGameOver();
                 return;
             }
         }
     };
-    SnakeGame.prototype.gameOver = function () {
-        if (this.gameLoopId) {
+    SnakeGame.prototype.handleGameOver = function () {
+        if (this.gameLoopId)
             cancelAnimationFrame(this.gameLoopId);
-        }
-        alert("GAME OVER\uFF01PUNKTE: ".concat(this.score));
-        this.init();
+        this.vibrate(200);
+        alert("GAME OVER! Score: ".concat(this.score));
+        this.initGame();
     };
     SnakeGame.prototype.bindEvents = function () {
         var _this = this;
+        // Keyboard controls
+        var lastKeyTime = 0;
         document.addEventListener('keydown', function (e) {
-            switch (e.key) {
-                case 'ArrowUp':
-                    if (_this.direction !== 'down')
-                        _this.nextDirection = 'up';
-                    break;
-                case 'ArrowDown':
-                    if (_this.direction !== 'up')
-                        _this.nextDirection = 'down';
-                    break;
-                case 'ArrowLeft':
-                    if (_this.direction !== 'right')
-                        _this.nextDirection = 'left';
-                    break;
-                case 'ArrowRight':
-                    if (_this.direction !== 'left')
-                        _this.nextDirection = 'right';
-                    break;
+            if (performance.now() - lastKeyTime < 100)
+                return;
+            var keyMap = {
+                'ArrowUp': 'up',
+                'ArrowDown': 'down',
+                'ArrowLeft': 'left',
+                'ArrowRight': 'right'
+            };
+            if (keyMap[e.key] && _this.isValidDirection(keyMap[e.key])) {
+                _this.nextDirection = keyMap[e.key];
+                lastKeyTime = performance.now();
+                e.preventDefault();
             }
         });
-        this.restartButton.addEventListener('click', function () { return _this.init(); });
+        // Touch controls
+        this.bindControlButton(this.upBtn, 'up');
+        this.bindControlButton(this.downBtn, 'down');
+        this.bindControlButton(this.leftBtn, 'left');
+        this.bindControlButton(this.rightBtn, 'right');
+        // Swipe controls
+        this.canvas.addEventListener('touchstart', function (e) {
+            var touch = e.touches[0];
+            _this.touchStartX = touch.clientX;
+            _this.touchStartY = touch.clientY;
+            _this.touchStartTime = performance.now();
+            e.preventDefault();
+        }, { passive: false });
+        this.canvas.addEventListener('touchmove', function (e) {
+            var touch = e.touches[0];
+            var deltaX = touch.clientX - _this.touchStartX;
+            var deltaY = touch.clientY - _this.touchStartY;
+            var deltaTime = performance.now() - _this.touchStartTime;
+            if (deltaTime < 100 && (Math.abs(deltaX) > 30 || Math.abs(deltaY) > 30)) {
+                var direction = Math.abs(deltaX) > Math.abs(deltaY)
+                    ? (deltaX > 0 ? 'right' : 'left')
+                    : (deltaY > 0 ? 'down' : 'up');
+                if (_this.isValidDirection(direction)) {
+                    _this.nextDirection = direction;
+                    _this.vibrate();
+                    _this.touchStartX = touch.clientX;
+                    _this.touchStartY = touch.clientY;
+                }
+                e.preventDefault();
+            }
+        }, { passive: false });
+        // Restart button
+        var lastClickTime = 0;
+        this.restartButton.addEventListener('click', function () {
+            if (performance.now() - lastClickTime < 1000)
+                return;
+            lastClickTime = performance.now();
+            _this.initGame();
+        });
+    };
+    SnakeGame.prototype.bindControlButton = function (btn, direction) {
+        var _this = this;
+        var handler = function (e) {
+            e.preventDefault();
+            if (_this.isValidDirection(direction)) {
+                _this.nextDirection = direction;
+                _this.vibrate();
+            }
+        };
+        btn.addEventListener('pointerdown', handler);
+        btn.addEventListener('touchstart', handler);
+    };
+    SnakeGame.prototype.isValidDirection = function (newDirection) {
+        var oppositeMap = {
+            up: 'down',
+            down: 'up',
+            left: 'right',
+            right: 'left'
+        };
+        return this.direction !== oppositeMap[newDirection];
+    };
+    SnakeGame.prototype.vibrate = function (duration) {
+        if (duration === void 0) { duration = 50; }
+        try {
+            if (navigator.vibrate) {
+                navigator.vibrate(duration);
+            }
+        }
+        catch (e) {
+            console.warn('Vibration API not supported');
+        }
     };
     return SnakeGame;
 }());
-// 启动游戏
-new SnakeGame();
+// Initialize game
+document.addEventListener('DOMContentLoaded', function () {
+    try {
+        new SnakeGame();
+    }
+    catch (error) {
+        console.error('Game initialization failed:', error);
+        alert('Game failed to initialize. Please check console for details.');
+    }
+});
